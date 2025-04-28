@@ -1,0 +1,141 @@
+{% block content %}
+<div class="login-page">
+    <div class="login-form">
+        <h2>Login to Your Account</h2>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Username"
+                       value="{{ username|default:'' }}" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+        <p class="register-link">New here? <a href="{% url 'register' %}">Create account</a></p>
+    </div>
+</div>
+
+<style>
+     body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        width: 350px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #28a745;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #28a745;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: #218838;
+    }
+
+    .messages {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+    .messages a {
+        color: #28a745;
+        text-decoration: none;
+    }
+
+    .messages a:hover {
+        text-decoration: underline;
+    }
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const loginBtn = document.getElementById('loginBtn');
+        if (!loginBtn) return;
+
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Получаем URL из Django template tag
+            let loginUrl;
+            try {
+                loginUrl = "{% url 'login' %}";
+            } catch (err) {
+                console.error('Template error:', err);
+                loginUrl = '/login/';
+            }
+
+            // Проверяем URL
+            if (!loginUrl || !loginUrl.startsWith('/')) {
+                console.warn('Invalid login URL, using fallback');
+                loginUrl = '/login/';
+            }
+
+            // Переходим на страницу входа
+            window.location.href = loginUrl;
+        });
+
+    } catch (error) {
+        console.error('Login button handler error:', error);
+    }
+});
+</script>
+{% endblock %}

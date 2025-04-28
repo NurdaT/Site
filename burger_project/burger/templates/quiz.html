@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина по компьютерному железу</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: left;
+            background-color: #f4f4f4;
+            padding: 20px;
+            color: black;
+        }
+        .quiz-container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .popup-question {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h2>Викторина по компьютерному железу</h2>
+        <form id="quizForm">
+            <div class="question">
+                <p>1. Какой разъём используется для современных видеокарт?</p>
+                <label><input type="radio" name="q1" value="AGP"> AGP</label><br>
+                <label><input type="radio" name="q1" value="PCI"> PCI</label><br>
+                <label><input type="radio" name="q1" value="PCIe"> PCIe</label><br>
+                <label><input type="radio" name="q1" value="ISA"> ISA</label><br>
+                <label><input type="radio" name="q1" value="VESA"> VESA</label>
+            </div>
+
+            <div class="question">
+                <p>2. Какой разъем используется для оперативной памяти? (Выберите все подходящие варианты)</p>
+                <label><input type="checkbox" name="q2" value="PCI"> PCI</label><br>
+                <label><input type="checkbox" name="q2" value="DIMM"> DIMM</label><br>
+                <label><input type="checkbox" name="q2" value="SATA"> SATA</label><br>
+                <label><input type="checkbox" name="q2" value="AGP"> AGP</label><br>
+                <label><input type="checkbox" name="q2" value="USB"> USB</label>
+            </div>
+
+            <div class="question">
+                <p>3. Оцените свои знания по компьютерному железу (0-100%)</p>
+                <input type="range" name="q3" min="0" max="100">
+            </div>
+
+            <div class="question">
+                <p>4. Выберите тип интерфейса для современных SSD:</p>
+                <select name="q4">
+                    <option value="" selected="selected"></option>
+                    <option value="SATA">SATA</option>
+                    <option value="PCIe">PCIe</option>
+                    <option value="USB">USB</option>
+                    <option value="SCSI">SCSI</option>
+                </select>
+            </div>
+
+            <button type="button" onclick="downloadResults()">Скачать результаты</button>
+        </form>
+    </div>
+
+    <script>
+        function togglePopup() {
+            const popup = document.querySelector('.popup-question');
+            popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function checkAnswers() {
+            let correctAnswers = {
+                q1: "PCIe",
+                q2: ["DIMM"],
+                q3: null,  // Ползунок не влияет на результаты
+                q4: "PCIe"
+            };
+
+            let userAnswers = {};
+            let score = 0;
+
+            // Проверка одиночных и множественных выборов
+            for (let key in correctAnswers) {
+                let selectedOptions = document.querySelectorAll(`input[name="${key}"]:checked`);
+                if (selectedOptions.length > 0) {
+                    userAnswers[key] = Array.from(selectedOptions).map(option => option.value);
+                    if (Array.isArray(correctAnswers[key])) {
+                        if (correctAnswers[key].every(val => userAnswers[key].includes(val))) {
+                            score++;
+                        }
+                    } else if (userAnswers[key][0] === correctAnswers[key]) {
+                        score++;
+                    }
+                }
+            }
+
+            // Ползунок (например, q3) просто сохраняем для отображения
+            const rangeInput = document.querySelector('input[name="q3"]');
+            if (rangeInput) {
+                userAnswers.q3 = rangeInput.value;
+            }
+
+            // Проверка выпадающего списка
+            const selectInput = document.querySelector('select[name="q4"]');
+            if (selectInput && selectInput.value === correctAnswers.q4) {
+            score++;
+            }
+
+            // Не отображаем результат на сайте
+            console.log(`Ваш результат: ${score}`);
+
+            return {score, userAnswers, correctAnswers}; // Возвращаем результат, ответы пользователя и правильные ответы
+        }
+
+        function downloadResults() {
+            const {score, userAnswers, correctAnswers} = checkAnswers();
+
+            // Генерация JSON-файла с результатами теста
+            let results = {
+                score: score,
+                userAnswers: userAnswers,
+                correctAnswers: correctAnswers
+            };
+            let blob = new Blob([JSON.stringify(results, null, 2)], { type: "application/json" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "results.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
